@@ -1,0 +1,80 @@
+# Solace Agent Mesh Agent Configuration
+
+log:
+  stdout_log_level: INFO
+  log_file_level: DEBUG
+  log_file: a2a_agent.log
+
+!include ../shared_config.yaml
+
+apps:
+  - name: "MathAgent__app"
+    app_base_path: .
+    app_module: solace_agent_mesh.agent.sac.app
+    broker:
+      <<: *broker_connection
+
+    app_config:
+      namespace: "${NAMESPACE}"
+      supports_streaming: true
+      agent_name: "MathAgent"
+      display_name: "Math Agent Agent"
+      
+      model:
+        model: "openai/gpt-4o-mini"
+        api_key: "${MATH_AGENT_OPENAI_API_KEY}"
+        timeout: 60
+        num_retries: 5
+
+        # --- Token + generation limits ---
+        max_tokens: 200
+
+      instruction: |
+        You are a helpful math assistant. You evaluate mathematical expressions accurately and return the final numeric answer. Use the provided math tools when necessary.
+      
+      tools: 
+        - component_module: custom_agents.math_agent.math_agent
+          function_name: evaluate_math_tool
+          tool_description: Evaluate mathematical expressions and return the result.
+          tool_name: math_evaluate
+          tool_type: python
+        - tool_type: mcp
+          tool_name: tavily_search
+          connection_params:
+            type: stdio
+            command: "npx"
+            args:
+              - "-y"
+              - mcp-remote
+              - "https://mcp.tavily.com/mcp/?tavilyApiKey=${TAVILY_API_KEY}"
+
+
+            
+      session_service: 
+        type: "sql"
+        default_behavior: "PERSISTENT"
+        database_url: "${MATH_AGENT_DATABASE_URL, sqlite:///math_agent.db}"
+      artifact_service: *default_artifact_service
+      
+      artifact_handling_mode: "reference"
+      enable_embed_resolution: true
+      enable_artifact_content_instruction: true
+      data_tools_config: *default_data_tools_config
+
+      # Agent Card Definition
+      agent_card:
+        description: |
+          A precise math assistant that solves arithmetic expressions, performs step-by-step calculations, and delivers accurate numeric results.
+        defaultInputModes: [text] 
+        defaultOutputModes: [text, file] 
+        skills: []
+      
+      # Discovery & Communication
+      agent_card_publishing: 
+        interval_seconds: 10
+      agent_discovery: 
+        enabled: true
+      inter_agent_communication:
+        allow_list: [] 
+        deny_list: [] 
+        request_timeout_seconds: 600

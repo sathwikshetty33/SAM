@@ -1,0 +1,64 @@
+# Math Agent Config
+
+log:
+  stdout_log_level: INFO
+  log_file_level: INFO
+  log_file: math_agent.log
+
+!include ../../shared_config.yaml
+
+apps:
+  - name: math-agent_app
+    app_base_path: .
+    app_module: solace_agent_mesh.agent.sac.app
+
+    broker:
+      <<: *broker_connection
+
+    app_config:
+      namespace: ${NAMESPACE}
+      agent_name: "MathAgent"
+      display_name: "MathAgent"
+      supports_streaming: false
+
+      model: *general_model
+
+      instruction: |
+        You are MathAgent. Your only responsibility is to evaluate mathematical expressions by using your math_evaluate tool.
+        Do NOT manually compute anything. Always call your tool.
+
+      inject_system_purpose: true
+      inject_response_format: true
+
+      session_service:
+        type: "sql"
+        database_url: "${MATHAGENT_DATABASE_URL, sqlite:///math_agent.db}"
+        default_behavior: "PERSISTENT"
+
+      artifact_service: *default_artifact_service
+      artifact_handling_mode: "reference"
+
+      tools:
+        - tool_type: python
+          tool_name: math_evaluate
+          component_module: custom_agents.math_agent.math_agent
+          function_name: evaluate_math_tool
+          required_scopes: []
+
+      agent_card:
+        description: "Performs arithmetic expressions using a dedicated evaluation tool."
+        defaultInputModes: [text]
+        defaultOutputModes: [text]
+        skills:
+          - id: math_eval
+            name: Math Evaluation
+            description: "Executes arithmetic using the evaluate_math_tool."
+
+      agent_card_publishing:
+        interval_seconds: 10
+
+      agent_discovery:
+        enabled: true
+
+      inter_agent_communication:
+        allow_list: ["*"]
