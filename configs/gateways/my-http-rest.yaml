@@ -27,16 +27,18 @@ apps:
       artifact_service: *default_artifact_service
 
       authorization_service:
-        type: "none" # Or "default_rbac"
-
+        type: "default_rbac"
+        users_file: "../creds/users.yaml"
+      auth:
+        enabled: true 
       # --- REST Gateway Specific Configuration ---
       rest_api_server_host: ${REST_API_HOST, 0.0.0.0}
       rest_api_server_port: ${REST_API_PORT, 9000}
       sync_mode_timeout_seconds: 300 # Timeout for the legacy v1 synchronous API
 
       # --- Authentication Configuration ---
-      enforce_authentication: false # Set to false to disable auth checks
-      external_auth_service_url: ${EXTERNAL_AUTH_SERVICE_URL, http://localhost:9000}
+      enforce_authentication: true # Set to false to disable auth checks
+      external_auth_service_url: ${EXTERNAL_AUTH_SERVICE_URL, http://localhost:9100}
 
       # --- Development User Identity (used when enforce_authentication is false) ---
       default_user_identity: "sam_dev_user"

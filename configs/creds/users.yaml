@@ -1,0 +1,10 @@
+users:
+  - username: "sathwik"
+    password: "mypassword123"
+    roles:
+      - admin
+      
+  - username: "clientapp"
+    password: "clientsecret"
+    roles:
+      - user
