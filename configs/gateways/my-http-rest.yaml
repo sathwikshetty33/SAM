@@ -10,23 +10,9 @@ log:
   log_file: my-http-rest.log
 
 # To use the `shared_config.yaml` file, uncomment the following line and remove the `shared_config` section below.
-# !include ../shared_config.yaml
+!include ../shared_config.yaml
 
-shared_config:
-  - broker_connection: &broker_connection
-      dev_mode: ${SOLACE_DEV_MODE, false}
-      broker_url: ${SOLACE_BROKER_URL, ws://localhost:8080}
-      broker_username: ${SOLACE_BROKER_USERNAME, default}
-      broker_password: ${SOLACE_BROKER_PASSWORD, default}
-      broker_vpn: ${SOLACE_BROKER_VPN, default}
-      temporary_queue: ${USE_TEMPORARY_QUEUES, true}
 
-  - services:
-    # Default artifact service configuration
-    artifact_service: &default_artifact_service
-      type: "filesystem"
-      base_path: "/tmp/samv2"
-      artifact_scope: namespace # Or "namespace", "app", "custom"
 
 apps:
   # --- App Definition ---
@@ -45,12 +31,12 @@ apps:
 
       # --- REST Gateway Specific Configuration ---
       rest_api_server_host: ${REST_API_HOST, 0.0.0.0}
-      rest_api_server_port: ${REST_API_PORT, 8080}
+      rest_api_server_port: ${REST_API_PORT, 9000}
       sync_mode_timeout_seconds: 300 # Timeout for the legacy v1 synchronous API
 
       # --- Authentication Configuration ---
       enforce_authentication: false # Set to false to disable auth checks
-      external_auth_service_url: ${EXTERNAL_AUTH_SERVICE_URL, http://localhost:8080}
+      external_auth_service_url: ${EXTERNAL_AUTH_SERVICE_URL, http://localhost:9000}
 
       # --- Development User Identity (used when enforce_authentication is false) ---
       default_user_identity: "sam_dev_user"
@@ -66,3 +52,5 @@ apps:
       response_format: >
             Responses should be clear, concise, and professionally toned.
             Format responses to the user in Markdown using appropriate formatting.
+
+
